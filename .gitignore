@@ -1,0 +1,11 @@
+*.pkl
+*.bag
+*.pth
+*.jpg
+*.png
+*.pyc
+build/
+devel/
+models/
+score/
+.ipynb_checkpoints/
