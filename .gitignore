@@ -6,6 +6,6 @@
 *.pyc
 build/
 devel/
-models/
-score/
+obj/
+lib/
 .ipynb_checkpoints/
