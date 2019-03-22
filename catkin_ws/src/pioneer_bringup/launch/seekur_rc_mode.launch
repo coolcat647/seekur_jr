@@ -2,15 +2,25 @@
 <launch>
     <!-- Parameters -->
     <arg name="_baud" default="115200" />
-    <arg name="_port" default="/dev/ttyUSB0" />
-
-    <!-- Rosserial -->
+    <arg name="_port" default="/dev/seekur_controller" />
+    <arg name="joy_dev" default="/dev/input/js0" />
+    
     <include file="$(find pioneer_bringup)/launch/minimal.launch" />
-    <node pkg="rosserial_python" type="serial_node.py" name="serial_node" required="true" output="screen">
+    <!-- Rosserial -->
+    <!-- <node pkg="rosserial_python" type="serial_node.py" name="serial_node" required="true" output="screen">
         <param name="baud" value="$(arg _baud)"/>
         <param name="port" value="$(arg _port)"/>
-    </node>
+    </node> -->
 
     <!-- Joystick mapper -->
-    <node pkg="pioneer_bringup" type="joystick_mapper.py" name="joystick_mapper" output="screen"/>
+    <!-- <node pkg="pioneer_bringup" type="joystick_mapper.py" name="joystick_mapper" output="screen"/> -->
+    <!-- <group if="$(optenv HUSKY_LOGITECH 0)" > -->
+    <rosparam command="load" file="$(find pioneer_bringup)/config/teleop.yaml" />
+    <param name="joy_node/dev" value="$(arg joy_dev)" />
+    <!-- </group> -->
+
+    <node pkg="joy" type="joy_node" name="joy_node" />
+
+    <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
+
 </launch>
