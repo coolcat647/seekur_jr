@@ -2,25 +2,55 @@
 <launch>
     <!-- Parameters -->
     <arg name="_baud" default="115200" />
-    <arg name="_port" default="/dev/seekur_controller" />
+    <arg name="_port" default="/dev/ttyUSB0" />
     <arg name="joy_dev" default="/dev/input/js0" />
+    <arg name="use_laser" default="false"/>
+    <arg name="use_lidar" default="true"/>
     
+    <!-- Main controller -->
     <include file="$(find pioneer_bringup)/launch/minimal.launch" />
+    
+    <!-- 2D Laser -->
+    <group if="$(arg use_laser)">
+        <node pkg="lms1xx" type="LMS1xx_node" name="LMS1xx_node" output="screen" >
+            <param name="host" value="192.168.0.2" />
+        </node>
+
+        <node pkg="pioneer_bringup" type="odom_baselink_tf.py" name="odom_baselink_tf" output="screen" />
+
+        <node pkg="tf" type="static_transform_publisher" name="basefootprint_baselink_tf" args="0.0 0.0 0.0 0.0 0.0 0.0 base_footprint base_link 10" />
+
+        <node pkg="tf" type="static_transform_publisher" name="baselink_laser_tf" args="0.0 0.0 0.0 0.13 0.0 0.39 base_link laser 10" />
+    </group>
+
+    <!-- 3D Lidar -->
+    <group if="$(arg use_lidar)">
+        <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch">
+            <arg name="device_ip" default="192.168.1.201" />
+            <arg name="frame_id" default="velodyne" />
+            <arg name="port" default="2368" />
+        </include>
+
+         <node pkg="tf" type="static_transform_publisher" name="baselink_laser_tf" args="0.0 0.0 0.5 0.0 0.0 0.0 base_link velodyne 10" />
+    </group>
+
+
+
     <!-- Rosserial -->
     <!-- <node pkg="rosserial_python" type="serial_node.py" name="serial_node" required="true" output="screen">
-        <param name="baud" value="$(arg _baud)"/>
+        <param name="baud" value="$(arg _baud)"/<name />
         <param name="port" value="$(arg _port)"/>
     </node> -->
 
     <!-- Joystick mapper -->
     <!-- <node pkg="pioneer_bringup" type="joystick_mapper.py" name="joystick_mapper" output="screen"/> -->
-    <!-- <group if="$(optenv HUSKY_LOGITECH 0)" > -->
     <rosparam command="load" file="$(find pioneer_bringup)/config/teleop.yaml" />
     <param name="joy_node/dev" value="$(arg joy_dev)" />
-    <!-- </group> -->
 
     <node pkg="joy" type="joy_node" name="joy_node" />
 
     <node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy"/>
+
+    
 
 </launch>
